@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Box, Button } from "@mui/material";
+import { Box, Button, IconButton } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
 import CreateModelModal from "../components/CreateModelModal";
 import api from "../api/config";
 
@@ -87,6 +88,21 @@ const Models = () => {
     }
   };
 
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this model?")) return;
+    try {
+      const token = localStorage.getItem("access_token");
+      await api.delete(`/model/${id}`, {
+        headers: {
+          Authorization: token ? `Bearer ${token}` : undefined,
+        },
+      });
+      setModels((prev) => prev.filter((model) => model.id !== id));
+    } catch (err) {
+      alert("Failed to delete model");
+    }
+  };
+
   return (
     <Box sx={{ width: "100%", minHeight: "60vh", position: "relative" }}>
       <Box
@@ -137,8 +153,17 @@ const Models = () => {
                 boxShadow: 2,
                 borderRadius: 2,
                 bgcolor: "background.paper",
+                position: "relative",
               }}
             >
+              <IconButton
+                aria-label="delete"
+                size="small"
+                sx={{ position: "absolute", top: 8, right: 8 }}
+                onClick={() => handleDelete(model._id)}
+              >
+                <DeleteIcon color="error" />
+              </IconButton>
               {model.imageUrl && (
                 <Box sx={{ mb: 1, display: "flex", justifyContent: "center" }}>
                   <img
